@@ -24,12 +24,6 @@ def main():
    	# User has used this program before
 
 
-
-  
-
-
-
-
 if __name__ == '__main__':
   # run main code here
   main()
