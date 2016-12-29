@@ -1,4 +1,7 @@
 import os
+import requests
+import scrapy
+from bs4 import BeautifulSoup
 
 
 def main():
@@ -7,7 +10,7 @@ def main():
         # Prompt the user to enter the payload path
         XSS_PAYLOADS = input("Enter the file path of your xss vectors")
 
-        while (len(XSS_PAYLOADS)) == 0):
+        while (len(XSS_PAYLOADS) == 0):
             XSS_PAYLOADS = input("Enter the filepath of your xss vectors")
 
         # Now set the environment variable 'XSS_PAYLOADS'
@@ -22,7 +25,7 @@ def main():
             editpath = input("Enter the new filepath")
             os.enivron["XSS_PAYLOADS"] = editpath
             print("Filepath has been edited to {}!").format(editpath)
-        else:
+        print("Payload path initialized!")
 
 
     if "__name__" == "__main__":
