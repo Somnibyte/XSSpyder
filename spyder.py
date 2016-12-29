@@ -3,6 +3,7 @@ import requests
 import scrapy
 from bs4 import BeautifulSoup
 
+# quick test
 
 def main():
     # First run check
