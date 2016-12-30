@@ -6,7 +6,7 @@ def main():
     # First run check
     if "XSS_PAYLOADS" not in os.environ:
         # Prompt the user to enter the payload path
-        XSS_PAYLOADS = input("Enter the file path of your xss vectors: )
+        XSS_PAYLOADS = input("Enter the file path of your xss vectors: ")
 
         while (len(XSS_PAYLOADS) == 0):
             XSS_PAYLOADS = input("Enter the filepath of your xss vectors: ")
