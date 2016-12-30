@@ -1,29 +1,16 @@
 import os
+import mechanize
 import scrapy
 
 
+# File operations go here
+def readFile(filename):
+    currentFile = open(filename)
+    # print currentFile.read()
+    currentFile.close()
+
 def main():
-    # First run check
-    if "XSS_PAYLOADS" not in os.environ:
-        # Prompt the user to enter the payload path
-        XSS_PAYLOADS = input("Enter the file path of your xss vectors: )
 
-        while (len(XSS_PAYLOADS) == 0):
-            XSS_PAYLOADS = input("Enter the filepath of your xss vectors: ")
-
-        # Now set the environment variable 'XSS_PAYLOADS'
-        os.environ["XSS_PAYLOADS"] = XSS_PAYLOADS
-    else:
-        # User has used this program before
-        # Checks to see if user would like to edit the filepath of payload
-        editpath = input("Would you like edit the payload path? [Y OR N] ")
-
-        # Edits filepath of payload
-        if editpath == 'Y':
-            editpath = input("Enter the new filepath")
-            os.environ["XSS_PAYLOADS"] = editpath
-            print("Filepath has been edited to {}!").format(editpath)
-        print("Payload path initialized!")
 
 
 if __name__ == "__main__":
