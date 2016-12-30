@@ -1,5 +1,16 @@
 import os
+import mechanize
 import scrapy
+
+
+
+# File operations go here
+def readFile(filename):
+    currentFile = open(filename)
+    # print currentFile.read()
+    currentFile.close()
+
+def main():
 
 
 def main():
@@ -24,6 +35,7 @@ def main():
             os.environ["XSS_PAYLOADS"] = editpath
             print("Filepath has been edited to {}!").format(editpath)
         print("Payload path initialized!")
+
 
 
 if __name__ == "__main__":
