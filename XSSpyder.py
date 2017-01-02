@@ -1,35 +1,47 @@
-# Unfinished
-
-import mechanize
-import scrapy
+# Incomplete
+# Crawling Issues
 
 
-# Thinking about crawling....
-# Will not work
-from bs4 import BeautifulSoup
 import requests
+import unicodedata
+from tld import get_tld
+from bs4 import BeautifulSoup
 
-url = "http://www.pixeljoint.com"
-data = requests.get(url).text
+visitedurls = []
 
-page = BeautifulSoup(data,'html.parser')
-vistedurls = {}
-
-def crawl(page):
+def crawl(seed):
+    if seed not in visitedurls:
+        visitedurls.append(seed)
+    else:
+        return
+    data = requests.get(seed).text
+    page = BeautifulSoup(data,'html.parser')
     for link in page.findAll('a'):
-        link.get('href')
-
-        print l
-
-# File operations go here
-def readFile(filename):
-    currentFile = open(filename)
-    # print currentFile.read()
-    currentFile.close()
+        l = link.get('href')
+        str_l = unicodedata.normalize('NFKD', l).encode('ascii','ignore')
+        if l[0] == "/":
+            l = seed + l
+            str_l = unicodedata.normalize('NFKD', l).encode('ascii','ignore')
+        if str_l[:4] != 'http' and str_l[:5] != 'https':
+            continue
+        if get_tld(seed) != get_tld(str_l):
+            continue
+        print(str_l)
+        crawl(str_l)
 
 def main():
-    browser = mechanize.Browser()
-    browser.open("http://localhost:8888/new%20design/")
+
+    payloads = [x for x in open("payloads.txt")]
+    visitedurls = []
+    seed = ""
+
+    if len(payloads) == 0:
+        print ("There are no XSS vectors within the payloads.txt file")
+        return
+    else:
+
+        seed = raw_input("Enter the url of the website you would like to scan for XSS vulnerabilites: (ex: http://www.google.com)")
+        crawl(seed)
 
 
 
