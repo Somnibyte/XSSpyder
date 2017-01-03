@@ -9,17 +9,18 @@ from bs4 import BeautifulSoup
 visitedurls = []
 branches = []
 
-def crawl(seed,depth):
+
+def crawl(seed,maxdepth,currentdepth):
 
     # defines global variables
     global visitedurls
     global branches
-    max = 0
 
     if seed not in visitedurls:
         visitedurls.append(seed)
     else:
         return
+    currentdepth = currentdepth + 1
     data = requests.get(seed).text
     page = BeautifulSoup(data,'html.parser')
     for link in page.findAll('a'):
@@ -35,13 +36,15 @@ def crawl(seed,depth):
             continue
         if get_tld(seed) != get_tld(l):
             continue
-        print(l)
-        crawl(l,depth)
+        visitedurls.append(l)
+
+        if currentdepth < maxdepth:
+            crawl(l,maxdepth,currentdepth)
 
 def main():
 
     payloads = [x for x in open("payloads.txt")]
-    visitedurls = []
+    currentdepth = 0
     seed = ""
 
     if len(payloads) == 0:
@@ -50,9 +53,12 @@ def main():
     else:
 
         seed = raw_input("Enter the url of the website you would like to scan for XSS vulnerabilites: (ex: http://www.google.com)")
-        depth = raw_input("Enter the magnitude of the depth of the search (ex: 3)")
+        maxdepth = raw_input("Enter the magnitude of the depth of the search (ex: 3)")
 
-        crawl(seed,depth)
+        crawl(seed,int(maxdepth),currentdepth)
+        print(visitedurls)
+
+
 
 
 
