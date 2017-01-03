@@ -1,5 +1,5 @@
-# Incomplete
-# Crawling Issues
+# Crawling Complete
+# Form Testing Incomplete
 
 import requests
 import unicodedata
@@ -10,9 +10,12 @@ visitedurls = []
 branches = []
 
 def crawl(seed,depth):
+
+    # defines global variables
     global visitedurls
     global branches
     max = 0
+
     if seed not in visitedurls:
         visitedurls.append(seed)
     else:
