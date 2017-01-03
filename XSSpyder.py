@@ -1,15 +1,18 @@
 # Incomplete
 # Crawling Issues
 
-
 import requests
 import unicodedata
 from tld import get_tld
 from bs4 import BeautifulSoup
 
 visitedurls = []
+branches = []
 
-def crawl(seed):
+def crawl(seed,depth):
+    global visitedurls
+    global branches
+    max = 0
     if seed not in visitedurls:
         visitedurls.append(seed)
     else:
@@ -18,16 +21,19 @@ def crawl(seed):
     page = BeautifulSoup(data,'html.parser')
     for link in page.findAll('a'):
         l = link.get('href')
-        str_l = unicodedata.normalize('NFKD', l).encode('ascii','ignore')
-        if l[0] == "/":
+        if l == None:
+            continue
+        if l[0] == "/" and l not in branches:
+            branches.append(l)
             l = seed + l
-            str_l = unicodedata.normalize('NFKD', l).encode('ascii','ignore')
-        if str_l[:4] != 'http' and str_l[:5] != 'https':
+        else:
             continue
-        if get_tld(seed) != get_tld(str_l):
+        if l[:4] != 'http' and l[:5] != 'https':
             continue
-        print(str_l)
-        crawl(str_l)
+        if get_tld(seed) != get_tld(l):
+            continue
+        print(l)
+        crawl(l,depth)
 
 def main():
 
@@ -41,7 +47,9 @@ def main():
     else:
 
         seed = raw_input("Enter the url of the website you would like to scan for XSS vulnerabilites: (ex: http://www.google.com)")
-        crawl(seed)
+        depth = raw_input("Enter the magnitude of the depth of the search (ex: 3)")
+
+        crawl(seed,depth)
 
 
 
