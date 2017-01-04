@@ -1,7 +1,7 @@
 # XSS (Cross Site Scripting) Vulnerablity Scanner
+# WORK IN PROGRESS
 
 import requests
-import unicodedata
 from tld import get_tld
 from bs4 import BeautifulSoup
 
@@ -52,6 +52,15 @@ def crawl(seed,maxdepth,currentdepth):
         if currentdepth < maxdepth:
             crawl(l,maxdepth,currentdepth)
 
+def verify(payloads):
+        for url in visitedurls:
+            for payload in payloads:
+                data = requests.get(url).text       #generate payloads dicitnary comprehension with special cases of email etc
+                page = BeautifulSoup(data,'html.parser')
+                for form in page.findAll("input"):
+
+                    print(form)
+
 def main():
     # loads payload file with XSS vectors
     payloads = [x for x in open("payloads.txt")]
@@ -71,6 +80,8 @@ def main():
 
         crawl(seed,int(maxdepth),currentdepth)
         print(visitedurls)
+        verify(payloads)
+
 
 if __name__ == "__main__":
     main()
