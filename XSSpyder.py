@@ -4,12 +4,15 @@
 import requests
 from tld import get_tld
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 
 # Holds all urls that the crawler has found
 visitedurls = []
 # Holds all website paths that the cralwer has found
 branches = []
 
+dummy_email = "spydertest@superduperfakesuperfakeexampleemailthingy.com"
+dummy_name = "dummyname"
 
 def crawl(seed,maxdepth,currentdepth):
 
@@ -29,7 +32,7 @@ def crawl(seed,maxdepth,currentdepth):
     page = BeautifulSoup(data,'html.parser')
 
     # For each valid link, it will find the links within itself
-    for link in page.findAll('a'):
+    for link in tqdm(page.findAll('a')):
         # Stores the href value
         l = link.get('href')
         # Checks if the href is empty
@@ -52,20 +55,79 @@ def crawl(seed,maxdepth,currentdepth):
         if currentdepth < maxdepth:
             crawl(l,maxdepth,currentdepth)
 
-def verify(payloads):
-        for url in visitedurls:
-            for payload in payloads:
-                data = requests.get(url).text       #generate payloads dicitnary comprehension with special cases of email etc
-                page = BeautifulSoup(data,'html.parser')
-                for form in page.findAll("input"):
+# Returns the payload for the POST request
+def process_forms(payload_file, form):
+    post_payload = {}
 
-                    print(form)
+    # Get all of the tags associated with forms
+    inputs = form.findAll('input')
+    textareas = form.findAll('textarea')
+    tags = inputs+textareas
+
+    # Turn input data into POST payload
+    for input in tqdm(tags):
+        for scripts in payload_file:
+
+            payload_text = None
+
+            if input.get('name').encode('ascii','ignore') == 'email':
+                payload_text = dummy_email
+            else:
+                payload_text = scripts
+
+            keyValuePair = {input.get('name').encode('ascii','ignore'):payload_text}
+            post_payload.update(keyValuePair)
+
+    return post_payload
+
+
+def verify(payload_file):
+    # Loop through each wepage
+
+    for url in visitedurls:
+
+        # Sends a get requests for website and returns the html in text form
+        data = requests.get(url).text
+
+        # Creates a BeautifulSoup Object
+        page = BeautifulSoup(data,'html.parser')
+
+        # Find all the forms within the page
+        forms = page.findAll('form')
+
+        for form in forms:
+            # Process each individual form to obtain the POST payload
+            POST_payload = process_forms(payload_file, form)
+
+            # Get the action attribute of the form
+            action = form.get('action')
+
+            # Send the POST request
+
+            # Check if the action attribute is a full URL or a single file
+            request_url = None
+            if url in action:
+                request_url = action
+            else:
+                request_url = url+action
+
+            r = requests.post(request_url, data=POST_payload)
+            print(r.text)
+
+            # Check if the XSS payload was found in the body of the response
+            if "<script>alert(\"XSS\")</script>" in r.text:
+                print("------------------------------------")
+                print("XSS Vulnerablity found on URL: {}".format(url))
+                print("With FORM -> [{}]".format(form))
+                print("------------------------------------")
 
 def main():
     # loads payload file with XSS vectors
     payloads = [x for x in open("payloads.txt")]
+
     # Counter for maxdepth variable
     currentdepth = 0
+
     # Holds the target website
     seed = ""
 
@@ -74,13 +136,16 @@ def main():
         print ("There are no XSS vectors within the payloads.txt file")
         return
     else:
-
-        seed = raw_input("Enter the url of the website you would like to scan for XSS vulnerabilites: (ex: http://www.google.com)")
-        maxdepth = raw_input("Enter the magnitude of the depth of the search (ex: 3)")
-
-        crawl(seed,int(maxdepth),currentdepth)
-        print(visitedurls)
-        verify(payloads)
+        option = raw_input("Would you like to test 1 URL? [Type yes or no] >")
+        seed = raw_input("Enter the url of the website you would like to scan for XSS vulnerabilites: (ex: http://www.google.com) >")
+        if option.lower() == 'yes':
+            visitedurls.append(seed)
+            verify(payloads)
+        else:
+            maxdepth = raw_input("Enter the magnitude of the depth of the search (ex: 3) >")
+            crawl(seed,int(maxdepth),currentdepth)
+            print(visitedurls)
+            verify(payloads)
 
 
 if __name__ == "__main__":
